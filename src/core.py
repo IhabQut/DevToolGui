@@ -1,6 +1,6 @@
 # core file (defining the logic)
 from pathlib import Path
-import os
+import subprocess
 
 def create_project(project_dir , project_name , mainfile_name) :
     project_path = Path(project_dir) / project_name
@@ -18,4 +18,17 @@ def create_mainfile(project_path , filename) :
     file_path = project_path / filename
     file_path.touch()
     return file_path
+
+# git section
+
+def git_init(project_dir) :
+    init  = subprocess.run(["git" , "init"], cwd = Path(project_dir) , check = True , capture_output = True , text= True)
+    return init.stdout
     
+def git_add(project_dir) :
+    subprocess.run(["git", "add", "."] , cwd = Path(project_dir) , check = True , capture_output = True , text= True)
+    return "Files staged successfully"
+
+def git_commit(project_dir) : 
+    commit  = subprocess.run(["git" , "commit" , "-m" , "Initial commit"], cwd = Path(project_dir) , check = True , capture_output = True , text= True)
+    return commit.stdout

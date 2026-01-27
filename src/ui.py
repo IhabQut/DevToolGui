@@ -118,6 +118,7 @@ def run_app():
     scroll.grid(row=1, column=1, sticky="ns")
     log_box.configure(yscrollcommand=scroll.set)
     log_box.configure(state="disabled")
+    
 
     def browse_folder():
         path = filedialog.askdirectory()
@@ -130,6 +131,7 @@ def run_app():
 
     def on_create():
         create_btn.config(state="disabled")
+        log_box.configure(state="normal")
         try :
             if not ProjectDir.get().strip() :
                 messagebox.showerror("Error", "Choose Projects Directory")
@@ -148,8 +150,15 @@ def run_app():
             cp, mfp = c.create_project(ProjectDir.get() , ProjectName.get() ,MainFileName.get())
             log(f"Project created at: {cp}")
             log(f"Main file: {mfp}")
+            git_init = c.git_init(cp)
+            log(f"Done : {git_init}")
+            git_add = c.git_add(cp)
+            log(f"Done : {git_add}")
+            git_commit = c.git_commit(cp)
+            log(f"Done : {git_commit}")
         finally : 
             create_btn.config(state="normal")
+            log_box.configure(state="disabled")
 
 
     browse_btn.config(command=browse_folder)

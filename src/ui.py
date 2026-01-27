@@ -3,8 +3,9 @@ from tkinter import ttk
 from tkinter import filedialog
 import os
 from tkinter import messagebox
-
+from . import core as c
 from pathlib import Path
+
 def run_app():
     
 
@@ -16,7 +17,7 @@ def run_app():
     Ptype = tk.StringVar()
     ProjectDir = tk.StringVar(value=os.getcwd())
     ProjectName = tk.StringVar(value="Untitled")
-    MainFileName = tk.StringVar(value="main.py")
+    MainFileName = tk.StringVar(value="main")
 
     style = ttk.Style(MainWin)
     style.theme_use("clam")
@@ -30,7 +31,7 @@ def run_app():
     style.configure("TCombobox", padding=(6, 4))
 
     MainWin.columnconfigure(0, weight=1)
-    MainWin.rowconfigure(2, weight=1)
+    MainWin.rowconfigure(3, weight=1)
 
     # Title
     ttk.Label(MainWin, text="Create New Project", style="Title.TLabel").grid(
@@ -116,6 +117,7 @@ def run_app():
     scroll = ttk.Scrollbar(log_frame, orient="vertical", command=log_box.yview)
     scroll.grid(row=1, column=1, sticky="ns")
     log_box.configure(yscrollcommand=scroll.set)
+    log_box.configure(state="disabled")
 
     def browse_folder():
         path = filedialog.askdirectory()
@@ -127,24 +129,30 @@ def run_app():
         log_box.see("end")
 
     def on_create():
-        if not ProjectDir.get().strip() :
-            messagebox.showerror("Error", "Choose Projects Directory")
-            return
-        if not Path(ProjectDir.get()).exists() :
-            messagebox.showerror("Error", "This directory does not exist")
-            return
-        if not ProjectName.get().strip() :
-            messagebox.showerror("Error", "Enter Project Name")
-            return
-        if not MainFileName.get().strip() :
-            MainFileName.set(value="main.py")
-            
-        log(f"Type: {Ptype.get()}")
-        log(f"Dir: {ProjectDir.get()}")
-        log(f"Name: {ProjectName.get()}")
-        log(f"Main: {MainFileName.get()}")
+        create_btn.config(state="disabled")
+        try :
+            if not ProjectDir.get().strip() :
+                messagebox.showerror("Error", "Choose Projects Directory")
+                return
+            if not Path(ProjectDir.get()).exists() :
+                messagebox.show("Error", "This directory does not exist")
+                return            
+            if not ProjectName.get().strip() :
+                messagebox.showerror("Error", "Enter Project Name")
+                return
+            if not MainFileName.get().strip() :
+                MainFileName.set(value="main")
 
-    browse_btn.config( command= browse_folder)
+            log("Creating project...")
+            log(f"Project Type : {Ptype.get()}")
+            cp, mfp = c.create_project(ProjectDir.get() , ProjectName.get() ,MainFileName.get())
+            log(f"Project created at: {cp}")
+            log(f"Main file: {mfp}")
+        finally : 
+            create_btn.config(state="normal")
+
+
+    browse_btn.config(command=browse_folder)
     create_btn.config(command=on_create)
 
     MainWin.mainloop()

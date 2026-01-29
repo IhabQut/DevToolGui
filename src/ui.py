@@ -4,6 +4,7 @@ from tkinter import filedialog
 import os
 from tkinter import messagebox
 from . import core as c
+from .utilities import config
 from pathlib import Path
 
 def run_app():
@@ -15,7 +16,7 @@ def run_app():
     MainWin.minsize(760, 620)
 
     Ptype = tk.StringVar()
-    ProjectDir = tk.StringVar(value=os.getcwd())
+    ProjectDir = tk.StringVar(value = config.load_project_dir(Path.cwd()))
     ProjectName = tk.StringVar(value="Untitled")
     MainFileName = tk.StringVar(value="main")
 
@@ -118,8 +119,9 @@ def run_app():
     scroll.grid(row=1, column=1, sticky="ns")
     log_box.configure(yscrollcommand=scroll.set)
     log_box.configure(state="disabled")
-    
 
+    config.config_setup()
+    
     def browse_folder():
         path = filedialog.askdirectory()
         if path:
@@ -137,7 +139,7 @@ def run_app():
                 messagebox.showerror("Error", "Choose Projects Directory")
                 return
             if not Path(ProjectDir.get()).exists() :
-                messagebox.show("Error", "This directory does not exist")
+                messagebox.showerror("Error", "This directory does not exist")
                 return            
             if not ProjectName.get().strip() :
                 messagebox.showerror("Error", "Enter Project Name")
@@ -159,6 +161,7 @@ def run_app():
         finally : 
             create_btn.config(state="normal")
             log_box.configure(state="disabled")
+            config.update_project_dir(cp.parent)
 
 
     browse_btn.config(command=browse_folder)

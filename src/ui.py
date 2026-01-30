@@ -8,7 +8,6 @@ from .utilities import config
 from pathlib import Path
 
 def run_app():
-    
 
     MainWin = tk.Tk()
     MainWin.title("Dev Tool")
@@ -16,7 +15,7 @@ def run_app():
     MainWin.minsize(760, 620)
 
     Ptype = tk.StringVar()
-    ProjectDir = tk.StringVar(value = config.load_project_dir(Path.cwd()))
+    ProjectDir = tk.StringVar(value=config.load_project_dir(Path.cwd()))
     ProjectName = tk.StringVar(value="Untitled")
     MainFileName = tk.StringVar(value="main")
 
@@ -30,27 +29,32 @@ def run_app():
     style.configure("TButton", padding=(10, 5))
     style.configure("TEntry", padding=(6, 4))
     style.configure("TCombobox", padding=(6, 4))
+    style.configure("TCheckbutton", font=("Arial", 11), padding=(4, 6))
+
 
     MainWin.columnconfigure(0, weight=1)
-    MainWin.rowconfigure(3, weight=1)
+    MainWin.rowconfigure(4, weight=1) 
 
     # Title
     ttk.Label(MainWin, text="Create New Project", style="Title.TLabel").grid(
         row=0, column=0, pady=(18, 10)
     )
 
-    # Card container
-    card = ttk.Frame(MainWin, padding=16)
-    card.grid(row=1, column=0, sticky="ew", padx=18)
-    card.columnconfigure(0, weight=1)
+    cards = ttk.Frame(MainWin)
+    cards.grid(row=1, column=0, sticky="ew", padx=18)
+    cards.columnconfigure(0, weight=1)
+    cards.columnconfigure(1, weight=1)
 
-    # Form frame inside card
-    form = ttk.Frame(card)
+
+    card1 = ttk.Frame(cards, padding=16)
+    card1.grid(row=0, column=0, sticky="nsew", padx=(0, 10))
+    card1.columnconfigure(0, weight=1)
+    
+    form = ttk.Frame(card1)
     form.grid(row=0, column=0, sticky="ew")
-    form.columnconfigure(0, weight=0)  # labels
-    form.columnconfigure(1, weight=1)  # inputs expand
-    form.columnconfigure(2, weight=0)  # browse button
-
+    form.columnconfigure(0, weight=0) 
+    form.columnconfigure(1, weight=1)  
+    form.columnconfigure(2, weight=0)
 
     # Project type
     ttk.Label(form, text="Type of Project", style="Field.TLabel").grid(
@@ -92,19 +96,34 @@ def run_app():
         row=3, column=1, columnspan=2, sticky="ew", pady=(0, 6)
     )
 
-    # Create button 
-    btn_row = ttk.Frame(card)
-    btn_row.grid(row=1, column=0, sticky="ew", pady=(10, 0))
+    card2 = ttk.Frame(cards, padding=16)
+    card2.grid(row=0, column=1, sticky="nsew", padx=(10, 0))
+    card2.columnconfigure(0, weight=1)
+
+    #Options
+    ttk.Label(card2, text="Options", style="Section.TLabel").grid(
+        row=0, column=0, sticky="w", pady=(0, 10)
+    )
+    # git init
+
+    use_git = tk.BooleanVar(value = True)
+    gitCheck = ttk.Checkbutton(card2 , variable = use_git ,text = "Git Initialize" , takefocus = 0, style= "TCheckbutton")
+    gitCheck.grid(row = 1 , column = 0 , sticky = "w")
+
+
+    btn_row = ttk.Frame(MainWin)
+    btn_row.grid(row=2, column=0, sticky="ew", padx=18, pady=(12, 0))
     btn_row.columnconfigure(0, weight=1)
 
     create_btn = ttk.Button(btn_row, text="Create Project", style="Primary.TButton")
     create_btn.grid(row=0, column=0, sticky="e")
 
-    # Log 
-    ttk.Separator(MainWin).grid(row=2, column=0, sticky="ew", padx=18, pady=(16, 10))
+    # Log separator
+    ttk.Separator(MainWin).grid(row=3, column=0, sticky="ew", padx=18, pady=(16, 10))
 
+    # Log frame
     log_frame = ttk.Frame(MainWin, padding=(18, 0, 18, 18))
-    log_frame.grid(row=3, column=0, sticky="nsew")
+    log_frame.grid(row=4, column=0, sticky="nsew")
     log_frame.columnconfigure(0, weight=1)
     log_frame.rowconfigure(1, weight=1)
 
@@ -121,52 +140,46 @@ def run_app():
     log_box.configure(state="disabled")
 
     config.config_setup()
-    
+
     def browse_folder():
         path = filedialog.askdirectory()
         if path:
             ProjectDir.set(path)
 
     def log(msg: str):
+        log_box.configure(state="normal")
         log_box.insert("end", msg + "\n")
         log_box.see("end")
+        log_box.configure(state="disabled")
 
     def on_create():
         create_btn.config(state="disabled")
-        log_box.configure(state="normal")
-        try :
-            if not ProjectDir.get().strip() :
+        cp = None
+        try:
+            if not ProjectDir.get().strip():
                 messagebox.showerror("Error", "Choose Projects Directory")
                 return
-            if not Path(ProjectDir.get()).exists() :
+            if not Path(ProjectDir.get()).exists():
                 messagebox.showerror("Error", "This directory does not exist")
-                return            
-            if not ProjectName.get().strip() :
+                return
+            if not ProjectName.get().strip():
                 messagebox.showerror("Error", "Enter Project Name")
                 return
-            if not MainFileName.get().strip() :
+            if not MainFileName.get().strip():
                 MainFileName.set(value="main")
 
             log("Creating project...")
             log(f"Project Type : {Ptype.get()}")
-            cp, mfp = c.create_project(ProjectDir.get() , ProjectName.get() ,MainFileName.get())
+            cp, mfp = c.create_project(ProjectDir.get(), ProjectName.get(), MainFileName.get() , use_git.get())
             log(f"Project created at: {cp}")
             log(f"Main file: {mfp}")
-            git_init = c.git_init(cp)
-            log(f"Done : {git_init}")
-            git_add = c.git_add(cp)
-            log(f"Done : {git_add}")
-            git_commit = c.git_commit(cp)
-            log(f"Done : {git_commit}")
-        finally : 
-            create_btn.config(state="normal")
-            log_box.configure(state="disabled")
-            config.update_project_dir(cp.parent)
 
+        finally:
+            create_btn.config(state="normal")
+            if cp is not None:
+                config.update_project_dir(cp.parent)
 
     browse_btn.config(command=browse_folder)
     create_btn.config(command=on_create)
 
     MainWin.mainloop()
-
-

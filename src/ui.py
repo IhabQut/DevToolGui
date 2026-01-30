@@ -170,10 +170,15 @@ def run_app():
 
             log("Creating project...")
             log(f"Project Type : {Ptype.get()}")
-            cp, mfp = c.create_project(ProjectDir.get(), ProjectName.get(), MainFileName.get() , use_git.get())
+            cp, mfp , git_output = c.create_project(ProjectDir.get(), ProjectName.get(), MainFileName.get() , use_git.get())
             log(f"Project created at: {cp}")
             log(f"Main file: {mfp}")
-
+            if use_git.get():
+                if git_output.strip():
+                    log("Git output:")
+                    log(git_output.strip())
+                else:
+                    log("Git initialized (no output).")
         finally:
             create_btn.config(state="normal")
             if cp is not None:

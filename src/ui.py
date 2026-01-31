@@ -18,6 +18,7 @@ def run_app():
     ProjectDir = tk.StringVar(value=config.load_project_dir(Path.cwd()))
     ProjectName = tk.StringVar(value="Untitled")
     MainFileName = tk.StringVar(value="main")
+    use_git = tk.BooleanVar(value = config.load_project_options(defualt=False))
 
     style = ttk.Style(MainWin)
     style.theme_use("clam")
@@ -106,10 +107,8 @@ def run_app():
     )
     # git init
 
-    use_git = tk.BooleanVar(value = True)
     gitCheck = ttk.Checkbutton(card2 , variable = use_git ,text = "Git Initialize" , takefocus = 0, style= "TCheckbutton")
     gitCheck.grid(row = 1 , column = 0 , sticky = "w")
-
 
     btn_row = ttk.Frame(MainWin)
     btn_row.grid(row=2, column=0, sticky="ew", padx=18, pady=(12, 0))
@@ -183,6 +182,7 @@ def run_app():
             create_btn.config(state="normal")
             if cp is not None:
                 config.update_project_dir(cp.parent)
+                config.update_project_options(use_git.get())
 
     browse_btn.config(command=browse_folder)
     create_btn.config(command=on_create)

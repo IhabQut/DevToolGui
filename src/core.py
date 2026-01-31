@@ -10,7 +10,7 @@ def create_project(project_dir , project_name , mainfile_name , use_git : bool) 
         counter += 1
     project_path.mkdir(parents=True , exist_ok= False)
     mainfile = create_mainfile(project_path , mainfile_name)
-    git_o = g.git_init(project_path) if use_git else None
+    git_o = g.git_init(project_path , use_git) if use_git else None
     return project_path , mainfile , git_o
 
 def create_mainfile(project_path , filename) :
